@@ -74,30 +74,36 @@ class CPU:
 
         print()
 
-    def run(self):
-        """Run the CPU."""
-        # ir is instruction register
-        # pc is the counter -> points us to memory location of ram
-        running = True
-        ir = self.ram[self.pc]  # current instruction
-        operand_a = self.ram_read(self.pc + 1)  # store bytes for a at pc + 1
-        operand_b = self.ram_read(self.pc + 2)  # store bytes for b at pc + 2
 
-        while running:  # 00000001 is HLT (halt)
-            if ir == 0b00000001:  # 0b preceding tells computer it is a binary number
-                running = False
-                self.pc = 0
-                # Halt the function, exit
-            elif ir == 0b10000010:  # register immidiate LDI
-                self.register[operand_a] = operand_b
-                self.pc += 3
-        elif ir == 0b01000111:
+HLT = 0b00000001  # 0b preceding tells computer it is a binary number
+LDI = 0b10000010
+PRN = 0b01000111
+
+
+def run(self):
+    """Run the CPU."""
+    # ir is instruction register
+    # pc is the counter -> points us to memory location of ram
+    running = True
+    ir = self.ram[self.pc]  # current instruction
+    operand_a = self.ram_read(self.pc + 1)  # store bytes for a at pc + 1
+    operand_b = self.ram_read(self.pc + 2)  # store bytes for b at pc + 2
+
+    while running:
+        if ir == HLT:
+            running = False
+            self.pc = 0
+            # Halt the function, exit
+        elif ir == LDI:
+            self.register[operand_a] = operand_b
+            self.pc += 3
+        elif ir == PRN:
             print(self.register[operand_a])
             self.pc += 2
-            elif ir == 0b00000001:
-                self.pc = 0
-                running = False
-                # halt function
-            '''
-            halted random py from class
-            '''
+        elif ir == HLT:
+            self.pc = 0
+            running = False
+            # halt function
+        '''
+halted random py from class
+'''
