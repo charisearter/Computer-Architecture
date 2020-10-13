@@ -8,9 +8,9 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        self.ram = [0] * 256
-        self.register = [0] * 8
-        self.pc = 0
+        self.ram = [0] * 256  # inital ram to hold 256 bytes of memory
+        self.register = [0] * 8  # eight general purpose registers
+        self.pc = 0  # program counter - address of currently executing instruction
 
     # Memory Address Register (mar) -- address or key we are writing value to
     # mar is address we are looking at and it is like an key in ram that returns the values at that address
@@ -79,9 +79,9 @@ class CPU:
         # ir is instruction register
         # pc is the counter -> points us to memory location of ram
         running = True
-        ir = self.ram[self.pc]
-        operand_a = self.ram_read(self.pc + 1)
-        operand_b = self.ram_read(self.pc + 2)
+        ir = self.ram[self.pc]  # current instruction
+        operand_a = self.ram_read(self.pc + 1)  # store bytes for a at pc + 1
+        operand_b = self.ram_read(self.pc + 2)  # store bytes for b at pc + 2
 
         while running:  # 00000001 is HLT (halt)
             if ir == 0b00000001:  # 0b preceding tells computer it is a binary number
