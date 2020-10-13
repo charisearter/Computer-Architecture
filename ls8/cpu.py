@@ -29,6 +29,11 @@ class CPU:
         address = 0
 
         # For now, we've just hardcoded a program:
+        # program = [0] * 256 #starts of blank and needs to lad from disk )open file and read)
+        with open('/examples/print8.ls8') as f:
+            for line in f:
+                line = line.strip()
+                print(line)
 
         program = [
             # From print8.ls8
