@@ -65,7 +65,7 @@ but you'll have to implement those three above instructions first!
 * Read this whole file.
 * Skim the spec.
 
-## Step 1: Add the constructor to `cpu.py`
+## Step 1: Add the constructor to `cpu.py` [x]
 
 Add list properties to the `CPU` class to hold 256 bytes of memory and 8
 general-purpose registers.
@@ -103,7 +103,7 @@ We'll make use of these helper function later.
 Later on, you might do further initialization here, e.g. setting the initial
 value of the stack pointer.
 
-## Step 3: Implement the core of `CPU`'s `run()` method
+## Step 3: Implement the core of `CPU`'s `run()` method []
 
 This is the workhorse function of the entire processor. It's the most difficult
 part to write.
