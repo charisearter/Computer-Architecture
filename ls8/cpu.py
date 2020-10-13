@@ -2,6 +2,10 @@
 
 import sys
 
+HLT = 0b00000001  # 0b preceding tells computer it is a binary number
+LDI = 0b10000010
+PRN = 0b01000111
+
 
 class CPU:
     """Main CPU class."""
@@ -30,10 +34,10 @@ class CPU:
 
         # For now, we've just hardcoded a program:
         # program = [0] * 256 #starts of blank and needs to lad from disk )open file and read)
-        with open('/examples/print8.ls8') as f:
-            for line in f:
-                line = line.strip()
-                print(line)
+        # with open('/examples/mult.ls8') as f:
+        #     for line in f:
+        #         line = line.strip()
+        #         print(line)
 
         program = [
             # From print8.ls8
@@ -79,36 +83,31 @@ class CPU:
 
         print()
 
+    def run(self):
+        """Run the CPU."""
+        # ir is instruction register
+        # pc is the counter -> points us to memory location of ram
+        running = True
+        # ir = self.ram[self.pc]  # current instruction
+        # operand_a = self.ram_read(self.pc + 1)  # store bytes for a at pc + 1
+        # operand_b = self.ram_read(self.pc + 2)  # store bytes for b at pc + 2
 
-HLT = 0b00000001  # 0b preceding tells computer it is a binary number
-LDI = 0b10000010
-PRN = 0b01000111
+        while running:
+            ir = self.ram[self.pc]  # current instruction
+            # store bytes for a at pc + 1
+            operand_a = self.ram_read(self.pc + 1)
+            # store bytes for b at pc + 2
+            operand_b = self.ram_read(self.pc + 2)
 
+            if ir == HLT:
+                running = False
+                self.pc = 0
+                # Halt the function, exit
+            elif ir == LDI:
+                self.register[operand_a] = operand_b
+                self.pc += 3
+            elif ir == PRN:
+                print(self.register[operand_a])
+                self.pc += 2
 
-def run(self):
-    """Run the CPU."""
-    # ir is instruction register
-    # pc is the counter -> points us to memory location of ram
-    running = True
-    ir = self.ram[self.pc]  # current instruction
-    operand_a = self.ram_read(self.pc + 1)  # store bytes for a at pc + 1
-    operand_b = self.ram_read(self.pc + 2)  # store bytes for b at pc + 2
-
-    while running:
-        if ir == HLT:
-            running = False
-            self.pc = 0
-            # Halt the function, exit
-        elif ir == LDI:
-            self.register[operand_a] = operand_b
-            self.pc += 3
-        elif ir == PRN:
-            print(self.register[operand_a])
-            self.pc += 2
-        elif ir == HLT:
-            self.pc = 0
-            running = False
-            # halt function
-        '''
-halted random py from class
-'''
+                # halt function
