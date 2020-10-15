@@ -8,48 +8,52 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        self.ram = [0] * 256  # inital ram to hold 256 bytes of memory
+        self.ram = [0] * 256  # initialize the ram to hold 256 bytes of memory
         self.reg = [0] * 8  # eight general purpose registers
+        # self.reg[7] is the reserved index of the Stack Pointer (SP)
         self.pc = 0  # program counter - address of currently executing instruction
-        self.running = True  # CPU_run is running while true
+        self.running = True  # CPU_run is running while true loop
 
-    # Memory Address Register (mar) -- address or key we are writing value to
-    # mar is address we are looking at and it is like an key in ram that returns the values at that address
+    # Memory Address Register (MAR) -- Holds memory address we're reading/writing
+    # MAR is address we are looking at and it is like a key in ram that returns the values at that address
+    def ram_read(self, MAR):
+        return self.ram[MAR]
 
-    def ram_read(self, mar):
-        return self.ram[mar]
-
-    # Memory Data Register (mdr) -- what is being written to the value
-
-    # add value to the address (mar) example ram(3,7) mar is 3 and the value will be mdr 7
-    def ram_write(self, mar, mdr):
-        self.ram[mar] = mdr
+    # Memory Data Register (MDR) - holds value of what was just read
+    # add value to the address (MAR) key:value MAR is key : MDR is valye MAR:MDR
+    def ram_write(self, MAR, MDR):
+        self.ram[MAR] = MDR
 
     def load(self):
         """Load a program into memory."""
-        address = 0
-        if len(sys.argv) != 2:
-            print("usage: comp.py progname")
-            sys.exit(1)
-        try:
-            with open(sys.argv[1]) as f:
-                for line in f:
-                    line = line.strip()
+        address = 0  # counter for index
+        if len(sys.argv) != 2:  # if sys.argc is not 2, something is missing
+            print("usage: comp.py progname")  # print this
+            sys.exit(1)  # exit ... no idea what 1 means
+        try:  # sys.argv takes 2 arguments. 1st argument is program file running
+            with open(sys.argv[1]) as f:  # open the file at index 1 (2nd argument)
+                for line in f:  # for each line in the file (f)
+                    line = line.strip()  # take away any leading or trailing spaces (whitespace)
+                    # if line is empty or starts with #
                     if line == '' or line[0] == "#":
-                        continue
+                        continue  # go to the next one
                     try:
+                        # splits # away and starts where it needs to be
                         str_value = line.split("#")[0]
+                        # changes into integer at base 2
                         value = int(str_value, 2)
-                    except ValueError:
+                    except ValueError:  # if none of these work
+                        # print this error with the string value
                         print(f"Invalid number: {str_value}")
-                        sys.exit(1)
+                        sys.exit(1)  # exit
+                    # add the value at the index of whatever the address counter is
                     self.ram[address] = value
-                    address += 1
-        except FileNotFoundError:
-            print(f"File not found: {sys.argv[1]}")
-            sys.exit(2)
+                    address += 1  # increment address counter
+        except FileNotFoundError:  # if no file found
+            print(f"File not found: {sys.argv[1]}")  # print error
+            sys.exit(2)  # exit
 
-    def alu(self, op, reg_a, reg_b):
+    def alu(self, op, reg_a, reg_b):  # Algorithmic Logic Unit (ALU)
         """ALU operations."""
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
@@ -57,12 +61,11 @@ class CPU:
             self.reg[reg_a] -= self.reg[reg_b]
         elif op == 'MUL':
             self.reg[reg_a] *= self.reg[reg_b]
-        elif op == 'DIV':
-            self.reg[reg_a] /= self.reg[reg_b]
         else:
+            # if none work give this error
             raise Exception(f"Unsupported ALU operation {op}")
 
-    def trace(self):
+    def trace(self):  # don't touch this
         """
         Handy function to print out the CPU state. You might want to call this
         from run() if you need help debugging.
@@ -88,48 +91,61 @@ class CPU:
         HLT = 0b00000001  # halt -- 0b preceding tells computer it is a binary number
         LDI = 0b10000010  # load
         PRN = 0b01000111  # print
+        ADD = 0b10100000  # add
+        SUB = 0b10100001  # subtract
         MUL = 0b10100010  # multiply
         PUSH = 0b01000101  # add to list
         POP = 0b01000110  # take away from list
         CALL = 0b01010000  # call the subroutine
         RET = 0b00010001  # mark end of subroutine (return)
-        SP = 7  # stack pointer
+        SP = 7  # stack pointer - reserved index of self.reg
         # operand_a = self.ram_read(self.pc + 1)  # store bytes for a at pc + 1
         # operand_b = self.ram_read(self.pc + 2)  # store bytes for b at pc + 2
 
         while self.running:
-            IR = self.ram_read(self.pc)  # current instruction
+            # Instruction Register (IR) -> holds the copy of the currently executing instruction
+            IR = self.ram_read(self.pc)
             # store bytes for a at pc + 1
             operand_a = self.ram_read(self.pc + 1)
             # store bytes for b at pc + 2
             operand_b = self.ram_read(self.pc + 2)
 
-            if IR == HLT:
+            if IR == HLT:  # HALT
                 self.running = False
-                self.pc = 0
-                # Halt the function, exit
-            elif IR == LDI:
+            elif IR == LDI:  # Load
                 self.reg[operand_a] = operand_b
                 self.pc += 3
-            elif IR == PRN:
+            elif IR == PRN:  # Print
                 print(self.reg[operand_a])
                 self.pc += 2
-            elif IR == MUL:
+            elif IR == ADD:  # Add
+                self.alu("ADD", operand_a, operand_b)
+                self.pc += 3
+            elif IR == SUB:  # Subtract
+                self.alu("SUB", operand_a, operand_b)
+                self.pc += 3
+            elif IR == MUL:  # Multiply
                 self.alu("MUL", operand_a, operand_b)
                 self.pc += 3
-            elif IR == PUSH:
+            elif IR == PUSH:  # Push - insert
                 SP -= 1
                 self.ram_write(SP, self.reg[operand_a])
                 self.pc += 2
-            elif IR == POP:
-                self.reg[operand_a] = self.ram[SP]  # creates spot
+            elif IR == POP:  # Pop - remove # from on the right   to = from
+                # creates spot -- to on the left hand side
+                self.reg[operand_a] = self.ram[SP]
                 SP += 1  # increment stack pointer
                 self.pc += 2
             elif IR == CALL:
-                SP -= 1
-                self.ram_write(SP, operand_b)
-                self.pc = self.reg[self.ram_read(operand_a)]
+                value = self.pc + 2  # the address of next instruction after call
+                SP -= 1  # decrement
+                self.ram[SP] = value  # writes value at index SP in ram
+                # sets PC to register of wherever it needs to go
+                self.pc = self.reg[operand_a]
             elif IR == RET:
-                address = self.ram_read(SP)
-                SP += 1
-                self.pc = address
+                # pops off value stored from stack and set PC to it to go back to it
+                self.pc = self.ram[SP]
+                SP += 1  # increment
+            else:  # otherwise
+                print(f'Unknown instruction {IR} at address {self.pc}')
+                sys.exit()
