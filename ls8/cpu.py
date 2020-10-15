@@ -126,12 +126,10 @@ class CPU:
                 SP += 1  # increment stack pointer
                 self.pc += 2
             elif IR == CALL:
-                # instruction is pushed onto the stack
-                # pc is address set to register
-                # pc + 2
-                pass
+                SP -= 1
+                self.ram_write(SP, operand_b)
+                self.pc = self.reg[self.ram_read(operand_a)]
             elif IR == RET:
-                # decrement stack by 1
-                # store popped off into PC
-                # pc = 1
-                pass
+                address = self.ram_read(SP)
+                SP += 1
+                self.pc = address
