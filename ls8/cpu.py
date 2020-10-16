@@ -13,9 +13,11 @@ class CPU:
         # self.reg[7] is the reserved index of the Stack Pointer (SP)
         self.pc = 0  # program counter - address of currently executing instruction
         self.running = True  # CPU_run is running while true loop
-
+        # Flag is set to no operation (NOP) because it doesn't do anything until certain CMP conditions are set in ALU
+        self.FL = 0
     # Memory Address Register (MAR) -- Holds memory address we're reading/writing
     # MAR is address we are looking at and it is like a key in ram that returns the values at that address
+
     def ram_read(self, MAR):
         return self.ram[MAR]
 
@@ -61,6 +63,16 @@ class CPU:
             self.reg[reg_a] -= self.reg[reg_b]
         elif op == 'MUL':
             self.reg[reg_a] *= self.reg[reg_b]
+        elif op == 'CMP':
+            if self.reg[reg_a] == self.reg[reg_b]:  # E A == B
+                self.FL |= 0b00000001
+                self.FL &= 0b11111001  # mask
+            if self.reg[reg_a] < self.reg[reg_b]:  # L A < B
+                self.FL |= 0b00000100
+                self.FL &= 0b11111100  # mask
+            if self.reg[reg_a] > self.reg[reg_b]:  # G A > B
+                self.FL |= 0b00000010
+                self.FL &= 0b11111010  # mask
         else:
             # if none work give this error
             raise Exception(f"Unsupported ALU operation {op}")
@@ -98,6 +110,12 @@ class CPU:
         POP = 0b01000110  # take away from list
         CALL = 0b01010000  # call the subroutine
         RET = 0b00010001  # mark end of subroutine (return)
+        CMP = 0b10100111  # handled by ALU and uses Flags
+        # If equal (E) flag is set, jump to the address stored in the given register
+        JEQ = 0b01010101  # jump is equal
+        JMP = 0b01010100  # jump to address stored in given register, set PC to that address
+        # if not equal (E = false), jump to address stored in given register
+        JNE = 0b01010110  # jump is not equal
         SP = 7  # stack pointer - reserved index of self.reg
         # operand_a = self.ram_read(self.pc + 1)  # store bytes for a at pc + 1
         # operand_b = self.ram_read(self.pc + 2)  # store bytes for b at pc + 2
@@ -127,6 +145,21 @@ class CPU:
             elif IR == MUL:  # Multiply
                 self.alu("MUL", operand_a, operand_b)
                 self.pc += 3
+            elif IR == CMP:  # compare
+                self.alu('CMP', operand_a, operand_b)
+                self.pc += 3
+            elif IR == JMP:  # jump
+                self.pc = self.reg[operand_a]
+            elif IR == JEQ:  # Jump is equal
+                if self.FL == 1:
+                    self.pc = self.reg[operand_a]
+                else:
+                    self.pc += 2
+            elif IR == JNE:  # jump is not equal
+                if self.FL != 1:
+                    self.pc = self.reg[operand_a]
+                else:
+                    self.pc += 2
             elif IR == PUSH:  # Push - insert
                 SP -= 1
                 self.ram_write(SP, self.reg[operand_a])
