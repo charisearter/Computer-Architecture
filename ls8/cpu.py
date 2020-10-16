@@ -14,7 +14,7 @@ class CPU:
         self.pc = 0  # program counter - address of currently executing instruction
         self.running = True  # CPU_run is running while true loop
         # Flag is set to no operation (NOP) because it doesn't do anything until certain CMP conditions are set in ALU
-        self.FL = 0
+        self.FL = 0b00000000
     # Memory Address Register (MAR) -- Holds memory address we're reading/writing
     # MAR is address we are looking at and it is like a key in ram that returns the values at that address
 
@@ -65,7 +65,7 @@ class CPU:
             self.reg[reg_a] *= self.reg[reg_b]
         elif op == 'CMP':
             if self.reg[reg_a] == self.reg[reg_b]:  # E A == B
-                self.FL |= 0b00000001
+                self.FL |= 0b00000001 # 1
                 self.FL &= 0b11111001  # mask
             if self.reg[reg_a] < self.reg[reg_b]:  # L A < B
                 self.FL |= 0b00000100
