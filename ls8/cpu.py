@@ -65,14 +65,14 @@ class CPU:
             self.reg[reg_a] *= self.reg[reg_b]
         elif op == 'CMP':
             if self.reg[reg_a] == self.reg[reg_b]:  # E A == B
-                self.FL |= 0b00000001 # 1
-                self.FL &= 0b11111001  # mask
+                self.FL |= 0b00000001  # 1
+                self.FL &= 0b11111001
             if self.reg[reg_a] < self.reg[reg_b]:  # L A < B
-                self.FL |= 0b00000100
-                self.FL &= 0b11111100  # mask
+                self.FL |= 0b00000100  # 4
+                self.FL &= 0b11111100
             if self.reg[reg_a] > self.reg[reg_b]:  # G A > B
-                self.FL |= 0b00000010
-                self.FL &= 0b11111010  # mask
+                self.FL |= 0b00000010  # 2
+                self.FL &= 0b11111010
         else:
             # if none work give this error
             raise Exception(f"Unsupported ALU operation {op}")
